@@ -1,17 +1,17 @@
+#include <iostream>
 #include <stdio.h>
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
+#include "cuda_runtime.h"
+#include "device_launch_parameters.h"
 
-__global__ void test01()
+__global__ void kernel()
 {
-    printf("The block id is %d --- The thread id is %d\n", blockIdx.x, threadIdx.x);
+  // print the block ids and thread ids.
+  printf("\nThe block id is %d----The thread id is %d\n",blockIdx.x,threadIdx.x);
 }
-
 int main()
 {
-    // Launch 1 block with 1 thread
-    test01<<<1,4>>>();
+  // PARAMS: (num_of_blk,no_of_thread)
+  kernel<<<1,512>>>();
 
-
-    return 0;
+  return 0;
 }
