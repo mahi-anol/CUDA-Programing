@@ -12,6 +12,6 @@ int main()
 {
   // PARAMS: (num_of_blk,no_of_thread)
   kernel<<<1,512>>>();
-
+  cudaDeviceSynchronize();
   return 0;
 }

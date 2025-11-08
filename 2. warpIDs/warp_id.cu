@@ -13,8 +13,8 @@ __global__ void test01()
 int main()
 {
     // Launch 1 block with 1 thread
-    test01<<<1,4>>>();
+    test01<<<1,128>>>();
 
-
+    cudaDeviceSynchronize();
     return 0;
 }
