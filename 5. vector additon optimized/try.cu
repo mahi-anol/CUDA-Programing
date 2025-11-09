@@ -50,7 +50,7 @@ int main()
     cudaEventRecord(start);
     vectorAdd<<<64,32>>>(dA,dB,dC,SIZE);
     cudaEventRecord(stop);
-    cudaDeviceSynchronize();
+    // cudaDeviceSynchronize();
 
 
 
