@@ -1,0 +1,12 @@
+nvidia-smi
+nvidia-smi -l 1 
+nvidia-smi --query-gpu=gpu_name,driver_version,temperature.gpu --format=csv > output.csv ## Doing specific info query
+nvidia-smi -i 0 -pl 150 #setting power limit to 150w for device 0.
+nvidia-smi -pm 1 ##Enable modification permission.
+nvidia-smi -pm 0 ##disable modification permission.
+nividia-smi -l 5 > output.txt
+nvidia-smi -q -d CLOCK  ##q means query , d means device, shows the clock used info.
+nvidia-smi -q -d SUPPORTED_CLOCKS ### TO check the supported clocks
+nvidia-smi -h ###TO see list of all the available commmands.
+nvidia-smi --reset-gpu-clocks ## Reseting gpu clocks.
+nvidia-smi --application-clocks=(2000,800) <memory,graphics>
