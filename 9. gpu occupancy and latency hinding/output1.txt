@@ -1,0 +1,6 @@
+Max thread per SM 0: 1024
+Max Warp per SM 0: 32
+
+
+Max threads per SM 1: 1024 
+Max warps per SM 1: 32 

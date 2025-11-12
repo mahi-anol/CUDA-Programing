@@ -1,28 +1,84 @@
 #include <stdio.h>
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
+#include <cuda.h>
 
-int main(){
+#define SIZE 1024*1024*32 // defining vector size 
 
-    int nDevices;
+// CUDA kernel vector addition.
+__global__ void vectorAdd(int* A,int* B,int* C,int n){
+    int i=threadIdx.x+blockIdx.x*blockDim.x; //blockDim= number of thread per block.
+    C[i]=A[i]+B[i];
+}
+int main()
+{   ///Adding two vector of size 1024
 
-    cudaGetDeviceCount(&nDevices);
+    // Index size for vector.
+    int size=SIZE*sizeof(int);
 
-    for(int i=0;i<nDevices;i++){
-        cudaDeviceProp prop;
-        cudaGetDeviceProperties(&prop,i);
-        printf("Device Number: %d\n",i);
-        printf("Device Name: %s\n",prop.name);
-        printf("Memory Clock Rate (KHz): %d\n",prop.memoryClockRate);
-        printf("Memory Bus width (bits): %d\n",prop.memoryBusWidth);
-        printf("Peck Memory Bandwidth (GB/s): %f\n",2.0*prop.memoryClockRate*(prop.memoryBusWidth/8)/1.0e6);
-        printf("Total global memory: %lu\n",prop.totalGlobalMem);
-        printf("Compute capability: %d.%d\n",prop.major,prop.minor);
-        printf("Number of SMs: %d\n",prop.multiProcessorCount);
-        printf("Max threads per block: %d\n",prop.maxThreadsPerBlock);
-        //Max thread per block
-        printf("Max threads dimentions: x = %d, y = %d, z = %d\n",prop.maxThreadsDim[0],prop.maxThreadsDim[1],prop.maxThreadsDim[2]);
-        //block per grid.
-        printf("Max grid dimentions: x = %d,y = %d,z = %d\n",prop.maxGridSize[0],prop.maxGridSize[1],prop.maxGridSize[2]);
+    /// to get a semi optimal block size we can do 
+    /// size/32 =64
+
+
+
+    // Allocating cpu memory
+    int* A ,* B,* C;
+    A=(int*)malloc(size);
+    B=(int*)malloc(size);
+    C=(int*)malloc(size);
+
+    // Allocating Device memeory
+    int* dA,* dB,* dC;
+    cudaMalloc((void**)&dA,size);
+    cudaMalloc((void**)&dB,size);
+    cudaMalloc((void**)&dC,size);
+
+    // assigning input
+    for(int i=0;i<SIZE;i++){
+        A[i]=i;
+        B[i]=SIZE-i;
     }
 
-    return 0;
+    cudaMemcpy(dA,A,size,cudaMemcpyHostToDevice);
+    cudaMemcpy(dB,B,size,cudaMemcpyHostToDevice);
+
+
+    cudaEvent_t start,stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+    // Lunching the kernel
+    cudaEventRecord(start);
+    vectorAdd<<<1024*32,1024>>>(dA,dB,dC,SIZE);
+    cudaEventRecord(stop);
+    // cudaDeviceSynchronize();
+
+
+
+    //copy result back to host.
+    cudaMemcpy(C,dC,size,cudaMemcpyDeviceToHost);
+    printf("\nExecution finished\n");
+
+    cudaEventSynchronize(stop);
+    float milliseconds=0;
+    cudaEventElapsedTime(&milliseconds,start,stop);
+    printf("Execution time: %f milliseconds\n",milliseconds);
+
+
+
+
+    // for(int i=0;i<SIZE;i++)
+    // {
+    //     printf("%d + %d = %d",A[i],B[i],C[i]);
+    //     printf("\n");
+    // }
+
+    // Cleaning memory
+    cudaFree(dA);
+    cudaFree(dB);
+    cudaFree(dC);
+    free(A);
+    free(B);
+    free(C);
+    cudaDeviceSynchronize();
+
 }
